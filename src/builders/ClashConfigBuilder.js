@@ -216,9 +216,6 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
     }
 
     hasProxyGroup(name) {
-        const normalize = (s) => typeof s === 'string' ? s.trim() : s;
-        const target = normalize(name);
-        return (this.config['proxy-groups'] || []).some(group => group && normalize(group.name) === target);
     }
 
     addAutoSelectGroup(proxyList) {
