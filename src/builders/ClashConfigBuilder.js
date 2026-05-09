@@ -333,55 +333,9 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
     }
 
     addAutoSelectGroup(proxyList) {
-        if (!this.includeAutoSelect) return;
-        this.config['proxy-groups'] = this.config['proxy-groups'] || [];
-        const autoName = this.t('outboundNames.Auto Select');
-        if (this.hasProxyGroup(autoName)) return;
-        const providerNames = this.getAllProviderNames();
-        if (uniqueNames(proxyList).length === 0 && providerNames.length === 0) return;
-
-        const group = {
-            name: autoName,
-            type: 'url-test',
-            proxies: deepCopy(uniqueNames(proxyList)),
-            url: 'https://www.gstatic.com/generate_204',
-            interval: 300,
-            lazy: false
-        };
-
-        if (providerNames.length > 0) {
-            group.use = providerNames;
-        }
-
-        this.config['proxy-groups'].push(group);
     }
 
     addNodeSelectGroup(proxyList) {
-        this.config['proxy-groups'] = this.config['proxy-groups'] || [];
-        const nodeName = this.t('outboundNames.Node Select');
-        if (this.hasProxyGroup(nodeName)) return;
-        const list = buildNodeSelectMembers({
-            proxyList,
-            translator: this.t,
-            groupByCountry: this.groupByCountry,
-            manualGroupName: this.manualGroupName,
-            countryGroupNames: this.countryGroupNames,
-            includeAutoSelect: this.shouldIncludeAutoSelectGroup(proxyList)
-        });
-
-        const group = {
-            type: "select",
-            name: nodeName,
-            proxies: list
-        };
-
-        // Add 'use' field if we have proxy-providers
-        const providerNames = this.getAllProviderNames();
-        if (providerNames.length > 0) {
-            group.use = providerNames;
-        }
-
-        this.config['proxy-groups'].unshift(group);
     }
 
     buildSelectGroupMembers(proxyList = []) {
@@ -396,73 +350,12 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
     }
 
     addOutboundGroups(outbounds, proxyList) {
-        outbounds.forEach(outbound => {
-            if (outbound !== this.t('outboundNames.Node Select')) {
-                const name = this.t(`outboundNames.${outbound}`);
-                if (!this.hasProxyGroup(name)) {
-                    let proxies = this.buildSelectGroupMembers(proxyList);
-                    // For rules that should default to DIRECT, move DIRECT to the front
-                    if (DIRECT_DEFAULT_RULES.has(outbound)) {
-                        proxies = ['DIRECT', ...proxies.filter(p => p !== 'DIRECT')];
-                    }
-                    const group = {
-                        type: "select",
-                        name,
-                        proxies
-                    };
-                    // Add 'use' field if we have proxy-providers
-                    const providerNames = this.getAllProviderNames();
-                    if (providerNames.length > 0) {
-                        group.use = providerNames;
-                    }
-                    this.config['proxy-groups'].push(group);
-                }
-            }
-        });
     }
 
     addCustomRuleGroups(proxyList) {
-        if (Array.isArray(this.customRules)) {
-            this.customRules.forEach(rule => {
-                const name = this.t(`outboundNames.${rule.name}`);
-                if (!this.hasProxyGroup(name)) {
-                    const proxies = buildCustomRuleMembers({
-                        proxyList,
-                        translator: this.t,
-                        manualGroupName: this.manualGroupName,
-                        includeAutoSelect: this.shouldIncludeAutoSelectGroup(proxyList)
-                    });
-                    const group = {
-                        type: "select",
-                        name,
-                        proxies
-                    };
-                    // Add 'use' field if we have proxy-providers
-                    const providerNames = this.getAllProviderNames();
-                    if (providerNames.length > 0) {
-                        group.use = providerNames;
-                    }
-                    this.config['proxy-groups'].push(group);
-                }
-            });
-        }
     }
 
     addFallBackGroup(proxyList) {
-        const name = this.t('outboundNames.Fall Back');
-        if (this.hasProxyGroup(name)) return;
-        const proxies = this.buildSelectGroupMembers(proxyList);
-        const group = {
-            type: "select",
-            name,
-            proxies
-        };
-        // Add 'use' field if we have proxy-providers
-        const providerNames = this.getAllProviderNames();
-        if (providerNames.length > 0) {
-            group.use = providerNames;
-        }
-        this.config['proxy-groups'].push(group);
     }
 
     addCountryGroups() {
