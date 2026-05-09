@@ -1,56 +1,64 @@
-import { parseServerInfo, parseUrlParams, createTlsConfig } from '../../utils.js';
+import { parseServerInfo, parseUrlParams, parseArray, parseBool, parseMaybeNumber } from '../../utils.js';
 
-/**
- * Parse AnyTLS proxy URL
- * Format: anytls://password@server:port?params#name
- * @param {string} url - AnyTLS URL
- * @returns {object} - Parsed proxy object in sing-box format
- */
 export function parseAnytls(url) {
-  const { addressPart, params, name } = parseUrlParams(url);
-  
-  // Extract password and server info from addressPart (format: password@server:port)
-  const atSignIndex = addressPart.lastIndexOf('@');
-  let password = '';
-  let serverInfo = addressPart;
-  
-  if (atSignIndex > -1) {
-    password = decodeURIComponent(addressPart.slice(0, atSignIndex));
-    serverInfo = addressPart.slice(atSignIndex + 1);
-  }
-  
-  const { host, port } = parseServerInfo(serverInfo);
-  
-  // Build TLS config
-  const tls = {
-    enabled: true,
-    server_name: params.sni || params.host || '',
-    insecure: params.insecure === '1' || params.insecure === 'true' || params.allowInsecure === '1' || params.allowInsecure === 'true',
-  };
-  
-  // Add fingerprint if provided
-  if (params.fp) {
-    tls.utls = {
-      enabled: true,
-      fingerprint: params.fp
+    const { addressPart, params, name } = parseUrlParams(url);
+
+    let host;
+    let port;
+    let password;
+
+    if (addressPart.includes('@')) {
+        const [pwd, serverInfo] = addressPart.split('@');
+        const parsed = parseServerInfo(serverInfo);
+        host = parsed.host;
+        port = parsed.port;
+        password = decodeURIComponent(pwd);
+    } else {
+        const parsed = parseServerInfo(addressPart);
+        host = parsed.host;
+        port = parsed.port;
+        password = params.password || params.auth;
+    }
+
+    const tlsInsecure = parseBool(
+        params['skip-cert-verify'] ?? params.insecure ?? params.allowInsecure ?? params.allow_insecure
+    );
+
+    const tls = {
+        enabled: true,
+        server_name: params.sni || params.host,
+        ...(tlsInsecure !== undefined ? { insecure: tlsInsecure } : {})
     };
-  }
-  
-  // Add ALPN if provided
-  if (params.alpn) {
-    tls.alpn = params.alpn.split(',');
-  }
-  
-  return {
-    type: 'anytls',
-    tag: name || 'AnyTLS',
-    server: host,
-    server_port: port,
-    password: password,
-    tls: tls,
-    // Session validation parameters (optional)
-    ...(params.idle_session_check_interval ? { 'idle-session-check-interval': parseInt(params.idle_session_check_interval) } : {}),
-    ...(params.idle_session_timeout ? { 'idle-session-timeout': parseInt(params.idle_session_timeout) } : {}),
-    ...(params.min_idle_session ? { 'min-idle-session': parseInt(params.min_idle_session) } : {})
-  };
+
+    const alpn = parseArray(params.alpn);
+    if (alpn) {
+        tls.alpn = alpn;
+    }
+
+    const fingerprint = params['client-fingerprint'] || params.client_fingerprint;
+    if (fingerprint) {
+        tls.utls = {
+            enabled: true,
+            fingerprint
+        };
+    }
+
+    return {
+        tag: name,
+        type: 'anytls',
+        server: host,
+        server_port: port,
+        password,
+        ...(params.udp !== undefined ? { udp: parseBool(params.udp) } : {}),
+        'idle-session-check-interval': parseMaybeNumber(
+            params['idle-session-check-interval'] ?? params.idleSessionCheckInterval ?? params.idle_session_check_interval
+        ),
+        'idle-session-timeout': parseMaybeNumber(
+            params['idle-session-timeout'] ?? params.idleSessionTimeout ?? params.idle_session_timeout
+        ),
+        'min-idle-session': parseMaybeNumber(
+            params['min-idle-session'] ?? params.minIdleSession ?? params.min_idle_session
+        ),
+        tls
+    };
 }
