@@ -534,21 +534,85 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
      * instead of masking the upstream merge/parsing problem.
      */
     validateProxyGroups() {
-        (this.config['proxy-groups'] || []).forEach(group => {
-            const requiresMembers = group?.type === 'url-test' || group?.type === 'fallback';
+        // 1. 提取全局静态真实节点名字和提前拉取好的订阅源节点名字
+        const staticNodeNames = (this.config.proxies || []).map(p => p?.name).filter(Boolean);
+        const providerNodeNames = Array.isArray(this.providerNodeNames) ? this.providerNodeNames : [];
+        
+        // 合并成一个完整的目标节点池，供 include-all 模拟过滤
+        const totalAllNodeNames = [...staticNodeNames, ...providerNodeNames];
+    
+        const totalProviders = this.config['proxy-providers'] && typeof this.config['proxy-providers'] === 'object'
+            ? Object.keys(this.config['proxy-providers'])
+            : [];
+    
+        // 2. 遍历检查每一个策略组
+        this.config['proxy-groups'] = (this.config['proxy-groups'] || []).filter(group => {
+            // url-test 和 fallback 类型必须有节点，select 等类型如果不强制要求也可以通过此规则防空
+            const requiresMembers = group?.type === 'url-test' || group?.type === 'fallback'; //
             if (!requiresMembers) {
-                return;
+                //return; //手动注释，不需要类型判断组
             }
-
-            const hasProxyRefs = Array.isArray(group.proxies) && group.proxies.length > 0;
-            const hasProviderRefs = Array.isArray(group.use) && group.use.length > 0;
+    
+            // 2. 检查组内显式填写的引用
+            const hasProxyRefs = Array.isArray(group.proxies) && group.proxies.length > 0; //
+            const hasProviderRefs = Array.isArray(group.use) && group.use.length > 0; //
             if (hasProxyRefs || hasProviderRefs) {
-                return;
+                return true; //手动注释，不需要类型判断组
             }
-
-            const groupName = group?.name || '(unnamed group)';
-            throw new InvalidConfigError(
-                `Invalid proxy group "${groupName}": type "${group.type}" requires at least one proxy or provider reference`
+    
+            // 3. 针对 include-all: true 的高级复合判定
+            if (group?.['include-all'] === true) {
+                // 场景 A：如果节点池里有任意节点（静态或订阅源），模拟 filter 规则，验证过滤后是否还剩有节点
+                if (totalAllNodeNames.length > 0) {
+                    let filterRegex = null;
+                    let excludeRegex = null;
+    
+                    // 安全解析包含/排除正则表达式
+                    try {
+                        if (group.filter) filterRegex = new RegExp(group.filter);
+                        if (group['exclude-filter']) excludeRegex = new RegExp(group['exclude-filter']);
+                    } catch (e) {
+                        throw new InvalidConfigError(
+                            `Invalid regex filter in proxy group "${group?.name || '(unnamed group)'}": ${e.message}`
+                        );
+                    }
+    
+                    // 模拟内核：过滤整个节点池（包含静态节点 + 订阅源节点）
+                    const matchedNodes = totalAllNodeNames.filter(nodeName => {
+                        if (filterRegex && !filterRegex.test(nodeName)) return false;
+                        if (excludeRegex && excludeRegex.test(nodeName)) return false;
+                        return true;
+                    });
+    
+                    // 核心卡点：如果过滤后一个节点都不剩了...
+                    if (matchedNodes.length === 0) {
+                        // 连可疑的外部 proxy-providers 也没有，或者连提供者名字都没有匹配上，100% 为空，直接报错
+                        if (totalProviders.length === 0) {
+    						return false; //手动添加的
+                            const groupName = group?.name || '(unnamed group)';
+                            throw new InvalidConfigError(
+                                `Invalid proxy group "${groupName}": type "${group.type}" with include-all resulted in 0 matching nodes after applying filters.`
+                            );
+                        }
+                        // 如果有外部订阅源，但由于某些原因拉取日志为空（比如某次临时网络卡顿导致 this.providerNodeNames 没拿到数据），
+                        // 为了防止单次外部网络阻断导致整个 Cloudflare Worker 挂掉，我们选择信任订阅源，放行让内核在客户端运行时去动态匹配。
+                    } else {
+                        // 过滤后还有剩余有效节点，安全放行当前组
+                        return true;
+                    }
+                } 
+    			
+    			// 场景 B：完全没有静态节点，且没拉到任何订阅源节点，但有订阅源配置。放行靠内核运行时拉取，放行。
+                if (totalProviders.length > 0) {
+                    //return true; //手动注释，不需要类型判断组
+                }
+            }
+    
+            // 4. 前面 include-all 校验没通过，所有合规来源均为空时的兜底报错
+    		return false; //手动添加的
+            const groupName = group?.name || '(unnamed group)'; //
+            throw new InvalidConfigError( //
+                `Invalid proxy group "${groupName}": type "${group.type}" requires at least one proxy/provider reference, or valid non-empty matching nodes via include-all.`
             );
         });
     }
