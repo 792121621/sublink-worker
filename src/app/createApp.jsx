@@ -340,7 +340,8 @@ export function createApp(bindings = {}) {
             if (!originalParam) return c.text('Short URL not found', 404);
 
             const url = new URL(c.req.url);
-            return c.redirect(`${url.origin}/${prefix}${originalParam}`);
+            const redirectUrl = `${url.origin}/${prefix}${originalParam}`;
+            return Response.redirect(redirectUrl, 302);
         } catch (error) {
             return handleError(c, error, runtime.logger);
         }
