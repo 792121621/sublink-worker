@@ -23,7 +23,7 @@ function toStringArray(value) {
 // site/ip identifiers to a conservative charset matching upstream rule-set filenames:
 // letters, digits, hyphen, underscore, dot. We also reject `..` sequences and any
 // leading dot to prevent path traversal within the base URL path.
-const SAFE_RULE_ID_RE = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*$/;
+const SAFE_RULE_ID_RE = /^[A-Za-z0-9_@!-]+(?:\.[A-Za-z0-9_@!-]+)*$/;
 
 function sanitizeRuleIds(values) {
 	return toStringArray(values).filter(v => SAFE_RULE_ID_RE.test(v) && !v.includes('..'));
@@ -51,6 +51,22 @@ export function generateRules(selectedRules = [], customRules = []) {
 
 	const rules = [];
 
+	// 1. 先处理并收集自定义规则（保持原始传入顺序）
+	const parsedCustomRules = [];
+	customRules.forEach((rule) => {
+		parsedCustomRules.push({
+			site_rules: sanitizeRuleIds(rule.site),
+			ip_rules: sanitizeRuleIds(rule.ip),
+			domain_suffix: toStringArray(rule.domain_suffix),
+			domain_keyword: toStringArray(rule.domain_keyword),
+			ip_cidr: toStringArray(rule.ip_cidr),
+			src_ip_cidr: toStringArray(rule.src_ip_cidr),
+			protocol: toStringArray(rule.protocol),
+			outbound: rule.name
+		});
+	});
+
+	// 2. 再处理系统内置规则
 	UNIFIED_RULES.forEach(rule => {
 		if (selectedRules.includes(rule.name)) {
 			rules.push({
@@ -63,21 +79,8 @@ export function generateRules(selectedRules = [], customRules = []) {
 		}
 	});
 
-	customRules.reverse();
-	customRules.forEach((rule) => {
-		rules.unshift({
-			site_rules: sanitizeRuleIds(rule.site),
-			ip_rules: sanitizeRuleIds(rule.ip),
-			domain_suffix: toStringArray(rule.domain_suffix),
-			domain_keyword: toStringArray(rule.domain_keyword),
-			ip_cidr: toStringArray(rule.ip_cidr),
-			src_ip_cidr: toStringArray(rule.src_ip_cidr),
-			protocol: toStringArray(rule.protocol),
-			outbound: rule.name
-		});
-	});
-
-	return rules;
+	// 3. 将自定义规则排在最前面（优先级最高），系统规则紧随其后
+	return [...parsedCustomRules, ...rules];
 }
 
 export function generateRuleSets(selectedRules = [], customRules = []) {
