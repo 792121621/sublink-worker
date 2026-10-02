@@ -521,9 +521,21 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
         // 1. 提取全局静态真实节点名字和提前拉取好的订阅源节点名字
         const staticNodeNames = (this.config.proxies || []).map(p => p?.name).filter(Boolean);
         const providerNodeNames = Array.isArray(this.providerNodeNames) ? this.providerNodeNames : [];
+
+        // 新增：提取 proxy-providers 中所有的 additional-prefix 和 additional-suffix 名字
+         const providerDecoratorNames = [];
+         if (this.config['proxy-providers'] && typeof this.config['proxy-providers'] === 'object') {
+             Object.values(this.config['proxy-providers']).forEach(Provider => {
+				const prefix = Provider?.override?.['additional-prefix'];
+				const suffix = Provider?.override?.['additional-suffix'];
+				
+				if (prefix) providerDecoratorNames.push(prefix);
+				if (suffix) providerDecoratorNames.push(suffix);
+             });
+         }
         
-        // 合并成一个完整的目标节点池，供 include-all 模拟过滤
-        const totalAllNodeNames = [...staticNodeNames, ...providerNodeNames];
+        // 合并成一个完整的目标节点池（包含静态、订阅源以及前后缀名字），供 include-all 模拟过滤
+        const totalAllNodeNames = [...staticNodeNames, ...providerNodeNames, ...providerDecoratorNames];
     
         const totalProviders = this.config['proxy-providers'] && typeof this.config['proxy-providers'] === 'object'
             ? Object.keys(this.config['proxy-providers'])
