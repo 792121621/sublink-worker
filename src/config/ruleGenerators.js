@@ -238,7 +238,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			});
 			sanitizeRuleIds(rule.ip).forEach(ip => {
 				// 💡 直接在这里判断：如果是 'my' 开头，就用你专属的网址，否则用默认变量
-				const [baseUrl, currentFormat, currentExt] = (site && site.startsWith('my'))
+				const [baseUrl, currentFormat, currentExt] = (ip && ip.startsWith('my'))
 					? ['https://gh-proxy.com/https://github.com/792121621/clash/tree/main/rules/geoip/', 'yaml', '.yaml']  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
 					: [CLASH_IP_RULE_SET_BASE_URL, format, ext];
 				
