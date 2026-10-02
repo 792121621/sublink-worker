@@ -191,7 +191,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			behavior: 'domain',
 			url: `${CLASH_SITE_RULE_SET_BASE_URL}${rule}${ext}`,
 			path: `./ruleset/${rule}${ext}`,
-			interval: 86400
+			interval: 604800
 		};
 	});
 
@@ -202,7 +202,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			behavior: 'ipcidr',
 			url: `${CLASH_IP_RULE_SET_BASE_URL}${rule}${ext}`,
 			path: `./ruleset/${rule}-ip${ext}`,
-			interval: 86400
+			interval: 604800
 		};
 	});
 
@@ -214,7 +214,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			behavior: 'domain',
 			url: `${CLASH_SITE_RULE_SET_BASE_URL}geolocation-!cn${ext}`,
 			path: `./ruleset/geolocation-!cn${ext}`,
-			interval: 86400
+			interval: 604800
 		};
 	}
 
@@ -222,23 +222,33 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 	if (customRules) {
 		customRules.forEach(rule => {
 			sanitizeRuleIds(rule.site).forEach(site => {
+				// 💡 直接在这里判断：如果是 'my' 开头，就用你专属的网址，否则用默认变量
+				const baseUrl = (site && site.startsWith('my')) 
+					? 'https://gh-proxy.com/https://github.com/792121621/clash/tree/main/rules/geosite/'  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
+					: CLASH_SITE_RULE_SET_BASE_URL;
+				
 				site_rule_providers[site] = {
 					type: 'http',
 					format: format,
 					behavior: 'domain',
 					url: `${CLASH_SITE_RULE_SET_BASE_URL}${site}${ext}`,
 					path: `./ruleset/${site}${ext}`,
-					interval: 86400
+					interval: 604800
 				};
 			});
 			sanitizeRuleIds(rule.ip).forEach(ip => {
+				// 💡 直接在这里判断：如果是 'my' 开头，就用你专属的网址，否则用默认变量
+				const baseUrl = (ip && ip.startsWith('my')) 
+					? 'https://gh-proxy.com/https://github.com/792121621/clash/tree/main/rules/geoip/'  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
+					: CLASH_IP_RULE_SET_BASE_URL;
+				
 				ip_rule_providers[`${ip}-ip`] = {
 					type: 'http',
 					format: format,
 					behavior: 'ipcidr',
 					url: `${CLASH_IP_RULE_SET_BASE_URL}${ip}${ext}`,
 					path: `./ruleset/${ip}-ip${ext}`,
-					interval: 86400
+					interval: 604800
 				};
 			});
 		});
