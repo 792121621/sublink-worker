@@ -231,7 +231,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 					type: 'http',
 					format: currentFormat,
 					behavior: 'domain',
-					url: `${CLASH_SITE_RULE_SET_BASE_URL}${site}${currentExt}`,
+					url: `${baseUrl}${site}${currentExt}`,
 					path: `./ruleset/${site}${currentExt}`,
 					interval: 604800
 				};
@@ -244,9 +244,9 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 				
 				ip_rule_providers[`${ip}-ip`] = {
 					type: 'http',
-					format: currentExt,
+					format: currentFormat,
 					behavior: 'ipcidr',
-					url: `${CLASH_IP_RULE_SET_BASE_URL}${ip}${currentExt}`,
+					url: `${baseUrl}${ip}${currentExt}`,
 					path: `./ruleset/${ip}-ip${currentExt}`,
 					interval: 604800
 				};
