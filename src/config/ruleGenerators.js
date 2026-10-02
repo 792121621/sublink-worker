@@ -223,31 +223,31 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 		customRules.forEach(rule => {
 			sanitizeRuleIds(rule.site).forEach(site => {
 				// 💡 直接在这里判断：如果是 'my' 开头，就用你专属的网址，否则用默认变量
-				const baseUrl = (site && site.startsWith('my')) 
-					? 'https://gh-proxy.com/https://github.com/792121621/clash/tree/main/rules/geosite/'  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
-					: CLASH_SITE_RULE_SET_BASE_URL;
+				const [baseUrl, currentFormat, currentExt] = (site && site.startsWith('my'))
+					? ['https://gh-proxy.com/https://github.com/792121621/clash/tree/main/rules/geosite/', 'yaml', '.yaml']  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
+					: [CLASH_SITE_RULE_SET_BASE_URL, format, ext];
 				
 				site_rule_providers[site] = {
 					type: 'http',
-					format: format,
+					format: currentFormat,
 					behavior: 'domain',
-					url: `${CLASH_SITE_RULE_SET_BASE_URL}${site}${ext}`,
-					path: `./ruleset/${site}${ext}`,
+					url: `${CLASH_SITE_RULE_SET_BASE_URL}${site}${currentExt}`,
+					path: `./ruleset/${site}${currentExt}`,
 					interval: 604800
 				};
 			});
 			sanitizeRuleIds(rule.ip).forEach(ip => {
 				// 💡 直接在这里判断：如果是 'my' 开头，就用你专属的网址，否则用默认变量
-				const baseUrl = (ip && ip.startsWith('my')) 
-					? 'https://gh-proxy.com/https://github.com/792121621/clash/tree/main/rules/geoip/'  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
-					: CLASH_IP_RULE_SET_BASE_URL;
+				const [baseUrl, currentFormat, currentExt] = (site && site.startsWith('my'))
+					? ['https://gh-proxy.com/https://github.com/792121621/clash/tree/main/rules/geoip/', 'yaml', '.yaml']  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
+					: [CLASH_IP_RULE_SET_BASE_URL, format, ext];
 				
 				ip_rule_providers[`${ip}-ip`] = {
 					type: 'http',
-					format: format,
+					format: currentExt,
 					behavior: 'ipcidr',
-					url: `${CLASH_IP_RULE_SET_BASE_URL}${ip}${ext}`,
-					path: `./ruleset/${ip}-ip${ext}`,
+					url: `${CLASH_IP_RULE_SET_BASE_URL}${ip}${currentExt}`,
+					path: `./ruleset/${ip}-ip${currentExt}`,
 					interval: 604800
 				};
 			});
