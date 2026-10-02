@@ -77,22 +77,6 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
      */
     generateProxyProviders() {
         const providers = {};
-        const existingProviders = this.getExistingProviderNames();
-        this.getAutoProviderDescriptors(existingProviders).forEach(({ name, url }) => {
-            providers[name] = {
-                type: 'http',
-                url: url,
-                path: `./proxy_providers/${name}.yaml`,
-                interval: 3600,
-                'health-check': {
-                    enable: true,
-                    url: 'https://www.gstatic.com/generate_204',
-                    interval: 300,
-                    timeout: 5000,
-                    lazy: true
-                }
-            };
-        });
         return providers;
     }
 
