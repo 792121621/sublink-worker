@@ -191,8 +191,8 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			behavior: 'domain',
 			url: `${CLASH_SITE_RULE_SET_BASE_URL}${rule}${ext}`,
 			path: `./ruleset/${rule}${ext}`,
-			interval: 604800
-			proxy: GLOBAL
+			interval: 604800,
+			proxy: GLOBAL,
 			size-limit: 10485760
 		};
 	});
@@ -204,8 +204,8 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			behavior: 'ipcidr',
 			url: `${CLASH_IP_RULE_SET_BASE_URL}${rule}${ext}`,
 			path: `./ruleset/${rule}-ip${ext}`,
-			interval: 604800
-			proxy: GLOBAL
+			interval: 604800,
+			proxy: GLOBAL,
 			size-limit: 10485760
 		};
 	});
@@ -218,8 +218,8 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			behavior: 'domain',
 			url: `${CLASH_SITE_RULE_SET_BASE_URL}geolocation-!cn${ext}`,
 			path: `./ruleset/geolocation-!cn${ext}`,
-			interval: 604800
-			proxy: GLOBAL
+			interval: 604800,
+			proxy: GLOBAL,
 			size-limit: 10485760
 		};
 	}
@@ -239,8 +239,8 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 					behavior: 'domain',
 					url: `${baseUrl}${site}${currentExt}`,
 					path: `./ruleset/${site}${currentExt}`,
-					interval: 604800
-					proxy: GLOBAL
+					interval: 604800,
+					proxy: GLOBAL,
 					size-limit: 10485760
 				};
 			});
@@ -256,8 +256,8 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 					behavior: 'ipcidr',
 					url: `${baseUrl}${ip}${currentExt}`,
 					path: `./ruleset/${ip}-ip${currentExt}`,
-					interval: 604800
-					proxy: GLOBAL
+					interval: 604800,
+					proxy: GLOBAL,
 					size-limit: 10485760
 				};
 			});
