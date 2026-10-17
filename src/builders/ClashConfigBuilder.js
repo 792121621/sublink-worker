@@ -453,7 +453,7 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
                 .map(g => normalizeGroupName(g?.name))
                 .filter(Boolean)
         );
-        const validRefs = new Set(['DIRECT', 'REJECT']);
+        const validRefs = new Set(['DIRECT', 'REJECT', 'REJECT-DROP', 'PASS', 'PASS-RULE']);
         proxyList.forEach(n => validRefs.add(n));
         groupNames.forEach(n => validRefs.add(n));
 
