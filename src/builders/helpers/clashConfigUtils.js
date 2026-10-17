@@ -64,7 +64,7 @@ export function sanitizeClashProxyGroups(config) {
     }
     const proxyNames = new Set((config.proxies || []).map(p => normalize(p?.name)).filter(Boolean));
     const groupNames = new Set(groups.map(g => normalize(g?.name)).filter(Boolean));
-    const validNames = new Set(['DIRECT', 'REJECT'].map(normalize));
+    const validNames = new Set(['DIRECT', 'REJECT', 'REJECT-DROP', 'PASS', 'PASS-RULE'].map(normalize));
     proxyNames.forEach(n => validNames.add(n));
     groupNames.forEach(n => validNames.add(n));
 
