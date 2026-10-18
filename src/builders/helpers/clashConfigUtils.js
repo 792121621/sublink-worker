@@ -52,6 +52,14 @@ export function emitClashRules(rules = [], translator) {
             });
         });
 
+    rules
+        .filter(rule => Array.isArray(rule.custom) && rule.custom.length > 0)
+        .forEach(rule => {
+            rule.domain_suffix.forEach(suffix => {
+                results.push(`${suffix},${translator('outboundNames.' + rule.outbound)}`);
+            });
+        });
+
     return results;
 }
 
