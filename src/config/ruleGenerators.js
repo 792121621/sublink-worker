@@ -18,6 +18,18 @@ function toStringArray(value) {
 	return [];
 }
 
+function toStringArray2(value) {
+	if (Array.isArray(value)) {
+		return value
+			.filter(x => typeof x === 'string').map(x => x.trim())
+			.filter(Boolean);
+	}
+	if (typeof value === 'string') {
+		return value.split('|').map(x => x.trim()).filter(Boolean);
+	}
+	return [];
+}
+
 // Rule identifiers are interpolated into rule-set download URLs (e.g. `${BASE}${site}.srs`).
 // To prevent SSRF / URL-injection (CWE-918) via user-supplied customRules, restrict
 // site/ip identifiers to a conservative charset matching upstream rule-set filenames:
@@ -61,7 +73,7 @@ export function generateRules(selectedRules = [], customRules = []) {
 			domain_keyword: toStringArray(rule.domain_keyword),
 			ip_cidr: toStringArray(rule.ip_cidr),
 			src_ip_cidr: toStringArray(rule.src_ip_cidr),
-			custom: toStringArray(rule.custom),
+			custom: toStringArray2(rule.custom),
 			protocol: toStringArray(rule.protocol),
 			outbound: rule.name
 		});
