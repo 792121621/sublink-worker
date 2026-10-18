@@ -5,6 +5,14 @@ export function emitClashRules(rules = [], translator) {
     const results = [];
 
     rules
+        .filter(rule => Array.isArray(rule.custom) && rule.custom.length > 0)
+        .forEach(rule => {
+            rule.custom.forEach(custom => {
+                results.push(`${custom},${translator('outboundNames.' + rule.outbound)}`);
+            });
+        });
+    
+    rules
         .filter(rule => Array.isArray(rule.src_ip_cidr) && rule.src_ip_cidr.length > 0)
         .forEach(rule => {
             rule.src_ip_cidr.forEach(cidr => {
@@ -49,14 +57,6 @@ export function emitClashRules(rules = [], translator) {
         .forEach(rule => {
             rule.ip_cidr.forEach(cidr => {
                 results.push(`IP-CIDR,${cidr},${translator('outboundNames.' + rule.outbound)},no-resolve`);
-            });
-        });
-
-    rules
-        .filter(rule => Array.isArray(rule.custom) && rule.custom.length > 0)
-        .forEach(rule => {
-            rule.custom.forEach(custom => {
-                results.push(`${custom},${translator('outboundNames.' + rule.outbound)}`);
             });
         });
 
