@@ -205,7 +205,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			url: `${CLASH_IP_RULE_SET_BASE_URL}${rule}${ext}`,
 			path: `./ruleset/${rule}-ip${ext}`,
 			interval: 604800,
-			proxy: 'GLOBA',
+			proxy: 'GLOBAL',
 			'size-limit': 10485760
 		};
 	});
@@ -240,7 +240,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 					url: `${baseUrl}${site}${currentExt}`,
 					path: `./ruleset/${site}${currentExt}`,
 					interval: 604800,
-					proxy: 'GLOBA',
+					proxy: 'GLOBAL',
 					'size-limit': 10485760
 				};
 			});
