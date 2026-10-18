@@ -53,10 +53,10 @@ export function emitClashRules(rules = [], translator) {
         });
 
     rules
-        .filter(rule => Array.isArray(rule.customq) && rule.customq.length > 0)
+        .filter(rule => Array.isArray(rule.custom) && rule.custom.length > 0)
         .forEach(rule => {
-            rule.customq.forEach(customqa => {
-                results.push(`${customqa},${translator('outboundNames.' + rule.outbound)}`);
+            rule.custom.forEach(custom => {
+                results.push(`${custom},${translator('outboundNames.' + rule.outbound)}`);
             });
         });
 
