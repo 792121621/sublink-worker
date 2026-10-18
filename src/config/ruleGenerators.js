@@ -61,6 +61,7 @@ export function generateRules(selectedRules = [], customRules = []) {
 			domain_keyword: toStringArray(rule.domain_keyword),
 			ip_cidr: toStringArray(rule.ip_cidr),
 			src_ip_cidr: toStringArray(rule.src_ip_cidr),
+			custom: toStringArray(rule.custom),
 			protocol: toStringArray(rule.protocol),
 			outbound: rule.name
 		});
