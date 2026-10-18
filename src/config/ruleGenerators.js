@@ -230,7 +230,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			sanitizeRuleIds(rule.site).forEach(site => {
 				// 💡 直接在这里判断：如果是 'custom' 开头，就用你专属的网址，否则用默认变量
 				const [baseUrl, currentFormat, currentExt] = (site && site.startsWith('custom'))
-					? ['https://gh-proxy.com/https://github.com/792121621/clash/raw/refs/heads/custom/rules/geosite/', 'text', '.list']  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
+					? ['https://gh-proxy.com/https://github.com/792121621/clash-rules/raw/refs/heads/custom/geo/geosite/', 'text', '.list']  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
 					: [CLASH_SITE_RULE_SET_BASE_URL, format, ext];
 				
 				site_rule_providers[site] = {
@@ -247,7 +247,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			sanitizeRuleIds(rule.ip).forEach(ip => {
 				// 💡 直接在这里判断：如果是 'custom' 开头，就用你专属的网址，否则用默认变量
 				const [baseUrl, currentFormat, currentExt] = (ip && ip.startsWith('custom'))
-					? ['https://gh-proxy.com/https://github.com/792121621/clash/raw/refs/heads/custom/rules/geoip/', 'text', '.list']  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
+					? ['https://gh-proxy.com/https://github.com/792121621/clash-rules/raw/refs/heads/custom/geo/geoip/', 'text', '.list']  // 👈 把这里改成你实际的规则集托管网址（注意末尾带上斜杠 /）
 					: [CLASH_IP_RULE_SET_BASE_URL, format, ext];
 				
 				ip_rule_providers[`${ip}-ip`] = {
